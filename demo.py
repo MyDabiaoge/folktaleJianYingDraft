@@ -1,10 +1,10 @@
 # 导入模块
 import os
 import pyJianYingDraft as draft
-from pyJianYingDraft import IntroType, TransitionType, trange, tim
+from pyJianYingDraft import IntroType, TransitionType, trange, tim, OutroType, ClipSettings, KeyframeProperty
 
 # 设置草稿文件夹
-draft_folder = draft.DraftFolder(r"<你的草稿文件夹>")
+draft_folder = draft.DraftFolder(r"D:\Program Files\JianyingPro Drafts")
 
 tutorial_asset_dir = os.path.join(os.path.dirname(__file__), 'readme_assets', 'tutorial')
 assert os.path.exists(tutorial_asset_dir), f"未找到例程素材文件夹{os.path.abspath(tutorial_asset_dir)}"
@@ -22,9 +22,15 @@ audio_segment = draft.AudioSegment(os.path.join(tutorial_asset_dir, 'audio.mp3')
 audio_segment.add_fade("1s", "0s")                      # 增加一个1s的淡入
 
 # 创建视频片段（使用便捷构造，直接传入素材路径）
-video_segment = draft.VideoSegment(os.path.join(tutorial_asset_dir, 'video.mp4'),
-                                   trange("0s", "4.2s"))  # 片段将位于轨道上的0s-4.2s（取素材前4.2s内容，注意此处4.2s表示持续时长）
-video_segment.add_animation(IntroType.斜切)               # 添加一个入场动画"斜切"
+video_segment = draft.VideoSegment(os.path.join(tutorial_asset_dir, 'img.jpeg'),
+                                   trange("0s", "4.2s"),# 片段将位于轨道上的0s-4.2s（取素材前4.2s内容，注意此处4.2s表示持续时长）
+                                   clip_settings=ClipSettings(scale_x=1.1,scale_y=1.1)
+                                   )
+video_segment.add_animation(IntroType.横向模糊)
+video_segment.add_animation(OutroType.横向模糊)# 添加一个入场动画"斜切"
+# 添加两个不透明度关键帧形成1s的淡出效果
+video_segment.add_keyframe(KeyframeProperty.position_y, video_segment.start, -0.09765625) # 结束前1s完全不透明
+video_segment.add_keyframe(KeyframeProperty.position_y, video_segment.end, 0.09765625) # 片段结束时完全透明
 
 # 创建贴纸片段，由于需要读取素材长度，先创建素材实例
 gif_material = draft.VideoMaterial(os.path.join(tutorial_asset_dir, 'sticker.gif'))

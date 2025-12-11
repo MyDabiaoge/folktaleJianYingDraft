@@ -1,3 +1,8 @@
 pymediainfo
 imageio
 uiautomation>=2
+peewee
+pymysql
+openai
+requests
+volcengine-python-sdk[ark]
