@@ -35,14 +35,13 @@ if __name__ == '__main__':
     scenes = create_scenes(story_id)
     # 生成绘画提示词
     scenes_had_prompt = create_image_prompt(story_id)
-    Scenes.insert_many(scenes_had_prompt).execute()
     # 生成图片
     create_images(story_id)
     # 生成视频提示词
     create_v_prompt(story_id)
-    # 生成视频
-    create_videos(story_id)
     # 生成音频
     create_audios(story_id)
+    # 生成视频
+    create_videos(story_id)
     # 生成草稿
     create_jy_traft(story_id)

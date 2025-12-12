@@ -101,7 +101,7 @@ def retry_on_exception(max_retries: int = 3, delay: float = 1.0,
 
                 except exceptions as e:
                     last_exception = e
-                    print(f"函数 {func_name} 参数 {args} 第 {attempt + 1} 次调用失败: {str(e)}")
+                    print(f"函数 {func_name} 参数 {args}\n第 {attempt + 1} 次调用失败: {str(e)}")
 
                     if attempt == max_retries:
                         print(f"函数 {func_name} 达到最大重试次数 ({max_retries})，放弃重试")

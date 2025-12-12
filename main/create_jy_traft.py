@@ -93,7 +93,7 @@ def create_jy_traft(story_id: int):
                                                        )
                     script.add_segment(video_segment)
                     video_segment = draft.VideoSegment(os.path.join(scene.video_path3),
-                                                       trange(start_time + 20000000, voice_mat.duration - 10000000),
+                                                       trange(start_time + 20000000, voice_mat.duration - 20000000),
                                                        # 片段将位于轨道上的0s-4.2s（取素材前4.2s内容，注意此处4.2s表示持续时长）
                                                        clip_settings=ClipSettings(scale_x=1.0, scale_y=1.0)
                                                        )

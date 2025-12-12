@@ -5,11 +5,11 @@ import json
 
 from common.utils import decode_base64, save_to_file
 
-base_url = "http://1.95.136.171:5100"
-# base_url = "http://127.0.0.1:5100"
+# base_url = "http://1.95.136.171:5100"
+base_url = "http://127.0.0.1:5100"
 base_prompt = Template('''
 - **主要内容**：$content
-- **艺术风格**：中国传统工笔画风格,淡雅的青绿色调和墨色为主，暖色调点缀，细腻的线条勾勒，宁静致远的东方美学意境
+- **艺术风格**：古风写实插画，中国工笔与现代水彩融合风格，绢本细腻纹理质感，细节精致写实。柔和侧光，自然漫射光，轻柔明暗变化
 ''')
 
 
