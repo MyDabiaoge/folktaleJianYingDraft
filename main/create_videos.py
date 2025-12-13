@@ -48,26 +48,6 @@ def session_worker(session_id, scenes_queue, story_name, db_lock, failed_scenes_
             with db_lock:
                 scene.video_path1 = video_paths[0] if len(video_paths) > 0 else None
                 scene.save()
-            # 视频续生成
-            if scene.duration > 10000000:
-                last_image_path = rf"D:\Mine\folktale\{story_name}\videos\{scene.index}_1.jpeg"
-                image_path = get_video_last_frame(scene.video_path1, last_image_path)
-                video_paths = retryable_fun(
-                    session_id, scene.index, story_name, scene.v_prompt, image_path, 2
-                )
-                with db_lock:
-                    scene.video_path2 = video_paths[0] if len(video_paths) > 0 else None
-                    scene.save()
-                    # 视频续生成
-                if scene.duration > 20000000:
-                    last_image_path = rf"D:\Mine\folktale\{story_name}\videos\{scene.index}_2.jpeg"
-                    image_path = get_video_last_frame(scene.video_path2, last_image_path)
-                    video_paths = retryable_fun(
-                        session_id, scene.index, story_name, scene.v_prompt, image_path, 3
-                    )
-                    with db_lock:
-                        scene.video_path3 = video_paths[0] if len(video_paths) > 0 else None
-                        scene.save()
 
             thread_safe_print(f"--成功--线程{session_id}完成场景{scene.index}------- ")
 

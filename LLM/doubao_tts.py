@@ -6,8 +6,8 @@ import json
 from common.utils import decode_base64, save_to_file
 
 url = "https://openspeech.bytedance.com/api/v1/tts"
-app_id = "8342880414"
-token = "vPzFACfg4hzlJX3fbLYyYwb9f_Bhxks6"
+app_id = "3825016967"
+token = "Ac3Fn4ibVvi2JoyWWj9YiVQoF7VnQNWD"
 
 
 def create_voice(id: int, text):

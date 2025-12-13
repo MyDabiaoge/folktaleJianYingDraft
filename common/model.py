@@ -53,7 +53,7 @@ class Story(BaseModel):
     id = BigAutoField()
     name = CharField(null=True)
     update_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
-    video_scenes_num = IntegerField(constraints=[SQL("DEFAULT 2")], null=True)
+    video_scenes_num = IntegerField(constraints=[SQL("DEFAULT 4")], null=True)
 
     class Meta:
         table_name = 'story'

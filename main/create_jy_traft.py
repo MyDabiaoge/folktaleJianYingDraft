@@ -4,7 +4,9 @@ from common.caption_tools import process_single_subtitle
 from common.model import Story, Scenes
 import os
 import pyJianYingDraft as draft
-from pyJianYingDraft import IntroType, TransitionType, trange, tim, OutroType, ClipSettings, KeyframeProperty, Timerange
+from common.utils import get_video_last_frame
+from pyJianYingDraft import IntroType, TransitionType, trange, tim, OutroType, ClipSettings, KeyframeProperty, \
+    Timerange, GroupAnimationType
 
 
 def create_jy_traft(story_id: int):
@@ -42,8 +44,11 @@ def create_jy_traft(story_id: int):
                                        trange(0, 4884897),  # 片段将位于轨道上的0s-5s（注意5s表示持续时长而非结束时间）
                                        volume=6)  # 音量设置为60%(-4.4dB)
     script.add_segment(audio_segment, track_name="open")
+    # 组合动画合集
+    group_animation_list = [GroupAnimationType.缩放, GroupAnimationType.左拉镜, GroupAnimationType.右拉镜]
     # 处理每个场景
     start_time = 0
+    last_left_time = 0
     max_duration = 0
     for i, scene in enumerate(scenes_list):
         image_path = scene.image_path1
@@ -62,49 +67,51 @@ def create_jy_traft(story_id: int):
         script.add_segment(audio_segment, track_name="voice")
         # 添加视频\图片
         if scene.video_path1:
-            if voice_mat.duration < 10000000:
-                video_segment = draft.VideoSegment(os.path.join(scene.video_path1),
-                                                   trange(start_time, voice_mat.duration),
-                                                   # 片段将位于轨道上的0s-4.2s（取素材前4.2s内容，注意此处4.2s表示持续时长）
-                                                   clip_settings=ClipSettings(scale_x=1.0, scale_y=1.0)
-                                                   )
-                video_segment.add_transition(TransitionType.叠化)  # 注意转场添加在“前一个”视频片段上
-                script.add_segment(video_segment)
+            current_duration = voice_mat.duration + last_left_time
+            current_start = start_time - last_left_time
+            if current_duration > 10000000:
+                last_left_time = current_duration - 10000000
+                current_duration = 10000000
             else:
-                video_segment = draft.VideoSegment(os.path.join(scene.video_path1),
-                                                   trange(start_time, 10000000),
-                                                   # 片段将位于轨道上的0s-4.2s（取素材前4.2s内容，注意此处4.2s表示持续时长）
-                                                   clip_settings=ClipSettings(scale_x=1.0, scale_y=1.0)
-                                                   )
-                script.add_segment(video_segment)
-                if voice_mat.duration < 20000000:
-                    video_segment = draft.VideoSegment(os.path.join(scene.video_path2),
-                                                       trange(start_time + 10000000, voice_mat.duration - 10000000),
-                                                       # 片段将位于轨道上的0s-4.2s（取素材前4.2s内容，注意此处4.2s表示持续时长）
-                                                       clip_settings=ClipSettings(scale_x=1.0, scale_y=1.0)
-                                                       )
-                    video_segment.add_transition(TransitionType.叠化)  # 注意转场添加在“前一个”视频片段上
-                    script.add_segment(video_segment)
-                else:
-                    video_segment = draft.VideoSegment(os.path.join(scene.video_path2),
-                                                       trange(start_time+ 10000000, 10000000),
-                                                       # 片段将位于轨道上的0s-4.2s（取素材前4.2s内容，注意此处4.2s表示持续时长）
-                                                       clip_settings=ClipSettings(scale_x=1.0, scale_y=1.0)
-                                                       )
-                    script.add_segment(video_segment)
-                    video_segment = draft.VideoSegment(os.path.join(scene.video_path3),
-                                                       trange(start_time + 20000000, voice_mat.duration - 20000000),
-                                                       # 片段将位于轨道上的0s-4.2s（取素材前4.2s内容，注意此处4.2s表示持续时长）
-                                                       clip_settings=ClipSettings(scale_x=1.0, scale_y=1.0)
-                                                       )
-                    video_segment.add_transition(TransitionType.叠化)  # 注意转场添加在“前一个”视频片段上
-                    script.add_segment(video_segment)
+                last_left_time = 0
+            video_segment = draft.VideoSegment(os.path.join(scene.video_path1),
+                                               trange(current_start, current_duration),
+                                               # 片段将位于轨道上的0s-4.2s（取素材前4.2s内容，注意此处4.2s表示持续时长）
+                                               clip_settings=ClipSettings(scale_x=1.0, scale_y=1.0)
+                                               )
+            video_segment.add_transition(TransitionType.叠化)  # 注意转场添加在“前一个”视频片段上
+            video_segment.add_animation(GroupAnimationType.缩放)
+            script.add_segment(video_segment)
+            # video_count = math.ceil(voice_mat.duration / 10000000)
+            # item_start_item = start_time
+            # path = scene.video_path1
+            # for c in range(video_count):
+            #     current_duration = 10000000
+            #     if current_duration > voice_mat.duration - (c * 10000000):
+            #         current_duration = voice_mat.duration - (c * 10000000)
+            #         # if c >0:
+            #         #     last_image_path = rf"D:\Mine\folktale\{story.name}\videos\{scene.index}_1.jpeg"
+            #         #     path = get_video_last_frame(scene.video_path1, last_image_path)
+            #     video_segment = draft.VideoSegment(os.path.join(path),
+            #                                        trange(item_start_item, current_duration),
+            #                                        # 片段将位于轨道上的0s-4.2s（取素材前4.2s内容，注意此处4.2s表示持续时长）
+            #                                        clip_settings=ClipSettings(scale_x=1.0, scale_y=1.0)
+            #                                        )
+            #     video_segment.add_transition(TransitionType.叠化)  # 注意转场添加在“前一个”视频片段上
+            #     video_segment.add_animation(GroupAnimationType.缩放)
+            #     script.add_segment(video_segment)
+            #     item_start_item += 10000000
+
 
         else:
+            current_duration = voice_mat.duration
+            if last_left_time > 0:
+                current_duration = voice_mat.duration + last_left_time
+                last_left_time = 0
             video_segment = draft.VideoSegment(os.path.join(image_path),
-                                               trange(start_time, voice_mat.duration),
+                                               trange(start_time, current_duration),
                                                # 片段将位于轨道上的0s-4.2s（取素材前4.2s内容，注意此处4.2s表示持续时长）
-                                               clip_settings=ClipSettings(scale_x=1.1, scale_y=1.1)
+                                               clip_settings=ClipSettings(scale_x=1.0, scale_y=1.0)
                                                )
             # 添加一个转场
             video_segment.add_transition(TransitionType.叠化)  # 注意转场添加在“前一个”视频片段上
@@ -112,14 +119,19 @@ def create_jy_traft(story_id: int):
             #     video_segment.add_animation(IntroType.横向模糊)
             # if i != len(scenes_list) - 1:
             #     video_segment.add_animation(OutroType.横向模糊)
-            # 添加两个不移动关键帧形成上下移动的效果
-            start_value = -0.09765625
-            end_value = 0.09765625
-            if (i - 1) % 2 == 0:
-                start_value = 0.09765625
-                end_value = -0.09765625
-            video_segment.add_keyframe(KeyframeProperty.position_y, 0, start_value)
-            video_segment.add_keyframe(KeyframeProperty.position_y, video_segment.duration, end_value)
+
+            # # 添加两个不移动关键帧形成上下移动的效果
+            # start_value = -0.09765625
+            # end_value = 0.09765625
+            # if (i - 1) % 2 == 0:
+            #     start_value = 0.09765625
+            #     end_value = -0.09765625
+            # video_segment.add_keyframe(KeyframeProperty.position_y, 0, start_value)
+            # video_segment.add_keyframe(KeyframeProperty.position_y, video_segment.duration, end_value)
+
+            # 使用轮询算法选择组合动画
+            video_segment.add_animation(group_animation_list[i % len(group_animation_list)])
+
             script.add_segment(video_segment)
 
         # 添加字幕
